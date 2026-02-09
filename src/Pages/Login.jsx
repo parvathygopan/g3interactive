@@ -2,7 +2,7 @@ import React, {Fragment, useEffect, useState} from "react";
 
 import {toast} from "react-toastify";
 import {PulseLoader} from "react-spinners";
-import {useNavigate} from "react-router-dom";
+import {data, useNavigate} from "react-router-dom";
 import useAuth from "../hook/useAuth";
 
 function Login() {
@@ -29,26 +29,36 @@ function Login() {
     });
   };
   const handleLogin = async (e) => {
-    e.preventDefault();
-    if (payload.email.length == 0 || payload.password.length == 0) {
-      setError(true);
-      return;
-    }
-    if (payload.password != 12345678) {
-      toast.error("Incorrect Password");
-      return;
-    }
-   await loginUser(payload, {
-      onSuccess: () => {
-        toast.success("Welcome Admin!");
-        window.location.href = "/";
-      },
-      onFailed: (err) => {
-        console.error(err);
-        toast.error(err?.message || "Login failed");
-      },
-    });
-  };
+  e.preventDefault();
+  
+  if (payload.email.length === 0 || payload.password.length === 0) {
+    setError(true);
+    return;
+  }
+
+  const data ={
+    email:payload?.email,
+    password:payload?.password
+  }
+
+  await loginUser(formData, {
+    headers: {
+      'company_id': "01k0bd1gyjptcmwrnyg128vgar",
+      'Accept': 'application/json'
+    },
+    onSuccess: (response) => {
+      // Store the access_token
+      localStorage.setItem('access_token', response.access_token);
+      toast.success("Welcome Admin!");
+      window.location.href = "/";
+    },
+    onFailed: (err) => {
+      console.error(err);
+      toast.error(err?.response?.data?.message || "Login failed");
+    },
+  });
+};
+
   return (
     <div>
       <Fragment>

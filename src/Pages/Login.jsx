@@ -1,9 +1,9 @@
 import React, {Fragment, useEffect, useState} from "react";
-import useAuth from "../../Hooks/useAuth";
+
 import {toast} from "react-toastify";
 import {PulseLoader} from "react-spinners";
 import {useNavigate} from "react-router-dom";
-import "./Login.css";
+import useAuth from "../hook/useAuth";
 
 function Login() {
   const navigate = useNavigate();
@@ -13,7 +13,7 @@ function Login() {
     email: "",
     password: "",
   });
-  const {adminLogin, authLoading} = useAuth();
+  const {loginUser, isLoading} = useAuth();
   useEffect(() => {
     setTimeout(() => {
       setIsLoad(false);
@@ -38,7 +38,7 @@ function Login() {
       toast.error("Incorrect Password");
       return;
     }
-   await adminLogin(payload, {
+   await loginUser(payload, {
       onSuccess: () => {
         toast.success("Welcome Admin!");
         window.location.href = "/";
@@ -60,7 +60,7 @@ function Login() {
           <div className="login-page">
             <video className="login-video-bg" autoPlay loop muted playsInline>
               <source
-                src={require("../../Assets/g3/login.mp4")}
+                src={require("../Assets/login.mp4")}
                 type="video/mp4"
               />
             </video>
@@ -131,7 +131,7 @@ function Login() {
                           {payload.password.length !== 0 &&
                             payload.email.length !== 0 && (
                               <button className="btn login-btn" type="submit">
-                                {authLoading ? (
+                                {isLoading ? (
                                   <PulseLoader color="#fff" size={8} />
                                 ) : (
                                   "Login"

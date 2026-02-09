@@ -1,3 +1,4 @@
 export const APIEndpoints = {
-  getProductList:"posts"
+  getProductList:"posts",
+  login:"/login"
 };

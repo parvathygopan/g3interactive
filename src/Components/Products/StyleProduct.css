@@ -1,0 +1,16 @@
+.clr-txt{
+    font-size: 20px;
+    color: #125093 !important;
+}
+.rounded-cla{
+    background-color: #f3f3f3;
+    padding: 5px;
+    border-radius: 25px;
+    width: 70px;
+}
+.fw-class{
+     color: #125093 !important;
+     text-decoration: none;
+     font-weight: 700;
+     font-size: 22px;
+}

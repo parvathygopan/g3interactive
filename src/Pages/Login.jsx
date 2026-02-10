@@ -1,4 +1,4 @@
-import React, {Fragment, useEffect, useState} from "react";
+import React, {Fragment, useContext, useEffect, useState} from "react";
 
 import {toast} from "react-toastify";
 import {PulseLoader} from "react-spinners";
@@ -28,36 +28,34 @@ function Login() {
       return {...prev, [name]: value};
     });
   };
+  console.log();
   const handleLogin = async (e) => {
-  e.preventDefault();
-  
-  if (payload.email.length === 0 || payload.password.length === 0) {
-    setError(true);
-    return;
-  }
+    e.preventDefault();
 
-  const data ={
-    email:payload?.email,
-    password:payload?.password
-  }
+    if (payload.email.length === 0 || payload.password.length === 0) {
+      setError(true);
+      return;
+    }
 
-  await loginUser(data, {
-    headers: {
-      'company_id': "01k0bd1gyjptcmwrnyg128vgar",
-      'Accept': 'application/json'
-    },
-    onSuccess: (response) => {
-      // Store the access_token
-      localStorage.setItem('access_token', response.access_token);
-      toast.success("Welcome Admin!");
-      window.location.href = "/";
-    },
-    onFailed: (err) => {
-      console.error(err);
-      toast.error(err?.response?.data?.message || "Login failed");
-    },
-  });
-};
+    const formData = new FormData();
+    formData.append("email", payload.email);
+    formData.append("password", payload.password);
+    formData.append("ip_address", "220.233.36.40");
+    await loginUser(formData, {
+      headers: {
+        Accept: "application/json",
+      },
+      onSuccess: (response) => {
+        localStorage.setItem("access_token", response.access_token);
+        toast.success("Welcome Admin!");
+        window.location.href = "/";
+      },
+      onFailed: (err) => {
+        console.error(err);
+        toast.error(err?.response?.data?.message || "Login failed");
+      },
+    });
+  };
 
   return (
     <div>
@@ -69,10 +67,7 @@ function Login() {
           ></div>
           <div className="login-page">
             <video className="login-video-bg" autoPlay loop muted playsInline>
-              <source
-                src={require("../Assets/login.mp4")}
-                type="video/mp4"
-              />
+              <source src={require("../Assets/login.mp4")} type="video/mp4" />
             </video>
             <div className="login-bg-overlay">
               <div className="login-wrapper">

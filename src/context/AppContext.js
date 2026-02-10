@@ -9,15 +9,14 @@ export const AppContextProvider = (props) => {
     getProductList, productData, productLoading
   } = useProducts();
   const {
-    isLoading, loginUser, logoutUser, confirmTherapistPassword
-  } = useAuth()
+    isLoading, loginUser, } = useAuth()
   useEffect(() => {
     getProductList();
   }, []);
   return (
     <AppContext.Provider
       value={{
-        getProductList, productData, productLoading, isLoading, loginUser, logoutUser, confirmTherapistPassword
+        getProductList, productData, productLoading, isLoading, loginUser,
       }}
     >
       {props.children}

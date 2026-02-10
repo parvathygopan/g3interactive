@@ -1,6 +1,12 @@
 import React from "react";
 import {TbLayoutDashboard} from "react-icons/tb";
-import {LuLogOut, LuPower, LuPowerOff, LuSettings, LuUsers} from "react-icons/lu";
+import {
+  LuLogOut,
+  LuPower,
+  LuPowerOff,
+  LuSettings,
+  LuUsers,
+} from "react-icons/lu";
 import {RiUserStarLine} from "react-icons/ri";
 import {NavLink} from "react-router-dom";
 
@@ -13,21 +19,21 @@ const Sidebar = () => {
         <b className="small-head mb-3">
           <small>MAIN MENU</small>
         </b>
-        <li>
+        <li className="mt-3">
           <NavLink to="/" end className="menu-link">
             <TbLayoutDashboard />
             <span className="m-2">Dashboard</span>
           </NavLink>
         </li>
 
-        <li>
+        <li className="mt-3">
           <NavLink to="/users" className="menu-link">
             <RiUserStarLine />
             <span className="m-2">User Management</span>
           </NavLink>
         </li>
 
-        <li>
+        <li className="mt-3">
           <NavLink to="/team" className="menu-link">
             <LuUsers />
             <span className="m-2">Team</span>
@@ -37,7 +43,7 @@ const Sidebar = () => {
           <small>SETTINGS</small>
         </b>
 
-        <li>
+        <li className="mt-3">
           <LuSettings />
           <span className="m-2">Settings</span>
         </li>

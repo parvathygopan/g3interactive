@@ -1,43 +1,77 @@
 import axios from "axios";
 const BASE_URL = process.env.REACT_APP_API_BASE_URL;
 
+//Create a axios api instance
 const api = axios.create({
   baseURL: BASE_URL,
-  withCredentials: false, 
+  // headers: {
+  //   Authorization: localStorage.getItem("UserPersistent")
+  //     ? `Bearer ${
+  //         JSON.parse(localStorage.getItem("UserPersistent")).accessToken
+  //       }`
+  //     : null,
+  // },
+  headers: {
+    Accept: "application/json"
+  },
+  withCredentials: true,
 });
 
 //Interceptor for handle the response
 api.interceptors.response.use(
   function (response) {
-    return response.data;
+    let errorResponse = { message: "Someting Went Wrong", error: true };
+    if (
+      response.data != null &&
+      response.data.error != null &&
+      response.data.error === false
+    ) {
+      return response.data;
+    }
+
+    return Promise.reject(errorResponse);
   },
-  function (error) {
-    return Promise.reject(error);
+  function (res) {
+    let errorResponse = { message: "Someting Went Wrong", error: true };
+    if (res != null && res.response != null && res.response.data != null) {
+      errorResponse = res.response.data;
+    }
+    return Promise.reject(errorResponse);
   }
 );
 
 class BaseClient {
   //Get Method
   static async get(endpoint, { onSuccess, onFailed }) {
-  await api.get(endpoint)
-  .then((data) => onSuccess && onSuccess(data))
-  .catch((error) => onFailed && onFailed(error));
-
+    await api
+      .get(endpoint)
+      .then((data) => onSuccess && onSuccess(data))
+      .catch((error) => onFailed && onFailed(error));
   }
 
   //Post Method
   static async post(
     endpoint,
     payload,
-    { onSuccess, onFailed, authentication }
+    { onSuccess, onFailed, onProgress, authentication, headers }
   ) {
+    // Create an axios configuration object
+    const config = {
+      headers: headers || {},
+      onUploadProgress: (progressEvent) => {
+        if (onProgress) {
+          onProgress(progressEvent);
+        }
+      },
+    };
+
     await api
-      .post(endpoint, payload)
+      .post(endpoint, payload, config)
       .then((data) => onSuccess && onSuccess(data))
       .catch((error) => onFailed && onFailed(error));
   }
 
-  //put Method
+  //Put Method
   static async put(endpoint, payload, { onSuccess, onFailed }) {
     await api
       .put(endpoint, payload)

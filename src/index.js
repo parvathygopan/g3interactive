@@ -7,7 +7,7 @@ import { AppContextProvider } from './context/AppContext';
 import "./Style.css"
 const root = ReactDOM.createRoot(document.getElementById('root'));
 root.render(
-   <AppContextProvider>
+  <AppContextProvider>
     <React.StrictMode>
       <App />
     </React.StrictMode>

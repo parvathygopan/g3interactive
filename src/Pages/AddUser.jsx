@@ -60,11 +60,7 @@ function AddUser() {
     if (
       fullname.length === 0 ||
       email.length === 0 ||
-      phonenumber.length === 0 ||
-      designation.length === 0 ||
-      title.length === 0 ||
-      role.length === 0 ||
-      initials.length === 0
+      role.length === 0 
     ) {
       setError(true);
       return;
@@ -236,7 +232,7 @@ function AddUser() {
                     <div className="form-group">
                       <label for="phonenumber">Phone number</label>
                       <input
-                        type="text"
+                        type="mobile"
                         className="form-control"
                         value={phonenumber}
                         onChange={(e) => setPhonenumber(e.target.value)}
@@ -261,15 +257,7 @@ function AddUser() {
                         value={title}
                         onChange={(e) => setPhonenumber(e.target.value)}
                       />
-                      {error && title?.length === 0 ? (
-                        <>
-                          <span style={{color: "red"}}>
-                            Please fill your title
-                          </span>
-                        </>
-                      ) : (
-                        ""
-                      )}
+                    
                     </div>
                   </Col>
                 </Row>
@@ -285,13 +273,13 @@ function AddUser() {
                         <option selected hidden>
                           Select
                         </option>
-                        <option value="Personal Trainer">
-                          Personal Trainer
+                        <option value="mr">
+                          mr
                         </option>
-                        <option value="Mental therapist">
-                          Mental therapist
+                        <option value="mrs">
+                         mrs
                         </option>
-                        <option value="Yoga Teacher">Yoga Teacher</option>
+                 
                         <option
                           value="other"
                           onSelect={() => setShowOther(false)}
@@ -312,13 +300,13 @@ function AddUser() {
                         <option selected hidden>
                           Select
                         </option>
-                        <option value="Personal Trainer">
-                          Personal Trainer
+                        <option value="director">
+                          Director
                         </option>
-                        <option value="Mental therapist">
-                          Mental therapist
+                        <option value="accounts">
+                          Accounts
                         </option>
-                        <option value="Yoga Teacher">Yoga Teacher</option>
+                        <option value="Teacher">Teacher</option>
                         <option
                           value="other"
                           onSelect={() => setShowOther(false)}

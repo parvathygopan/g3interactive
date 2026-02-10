@@ -1,22 +1,49 @@
-import React, {useMemo, useState} from "react";
+import React, { useEffect, useMemo, useState } from "react";
+import { useNavigate } from "react-router-dom";
 
-const UsersTable = ({users}) => {
+const UsersTable = () => {
+  const navigate = useNavigate();
+
+  const [users, setUsers] = useState([]);
+
   const [currentPage, setCurrentPage] = useState(1);
-  const [perPage] = useState(10);
+  const perPage = 10;
+
+  const [searchTerm, setSearchTerm] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
+
+  const [statusMap, setStatusMap] = useState({});
   const [showModal, setShowModal] = useState(false);
   const [selectedUser, setSelectedUser] = useState(null);
-  const [userList, setUserList] = useState(users);
 
-  const totalPages = Math.ceil(users.length / perPage);
+  /* ===============================
+     FETCH USERS (fake api)
+  =============================== */
+  useEffect(() => {
+    const loadUsers = async () => {
+      const res = await fetch("https://jsonplaceholder.typicode.com/users");
+      const data = await res.json();
 
-  const paginatedUsers = useMemo(() => {
-    const start = (currentPage - 1) * perPage;
-    return users.slice(start, start + perPage);
-  }, [users, currentPage, perPage]);
+      const formatted = data.map((u) => ({
+        id: u.id,
+        name: u.name,
+        email: u.email,
+        phone: u.phone,
+        role: "User",
+        initials: u.name?.charAt(0),
+        title: "N/A",
+        active: true,
+      }));
 
-  const startItem = (currentPage - 1) * perPage + 1;
-  const endItem = Math.min(currentPage * perPage, users.length);
-  const [statusMap, setStatusMap] = useState({});
+      setUsers(formatted);
+    };
+
+    loadUsers();
+  }, []);
+
+  /* ===============================
+     ACTIONS
+  =============================== */
 
   const toggleStatus = (id) => {
     setStatusMap((prev) => ({
@@ -24,59 +51,110 @@ const UsersTable = ({users}) => {
       [id]: !prev[id],
     }));
   };
+
   const handleDeleteClick = (user) => {
     setSelectedUser(user);
     setShowModal(true);
   };
 
   const confirmDelete = () => {
-    setUserList((prev) => prev.filter((u) => u.id !== selectedUser.id));
+    setUsers((prev) => prev.filter((u) => u.id !== selectedUser.id));
     setShowModal(false);
+    setCurrentPage(1);
   };
 
-  const cancelDelete = () => {
-    setShowModal(false);
-  };
+  const handleAddUser = () => navigate("/add-user");
+
+  /* ===============================
+     FILTER
+  =============================== */
+
+  const filteredUsers = useMemo(() => {
+    return users.filter((user) => {
+      const matchesSearch =
+        user.name?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        user.email?.toLowerCase().includes(searchTerm.toLowerCase());
+
+      const status = statusMap[user.id] ?? user.active;
+
+      const matchesStatus =
+        statusFilter === "all" ||
+        (statusFilter === "active" && status) ||
+        (statusFilter === "inactive" && !status);
+
+      return matchesSearch && matchesStatus;
+    });
+  }, [users, searchTerm, statusFilter, statusMap]);
+
+  /* ===============================
+     PAGINATION
+  =============================== */
+
+  const totalPages = Math.ceil(filteredUsers.length / perPage);
+
+  const paginatedUsers = useMemo(() => {
+    const start = (currentPage - 1) * perPage;
+    return filteredUsers.slice(start, start + perPage);
+  }, [filteredUsers, currentPage]);
+
+  const startItem =
+    filteredUsers.length === 0 ? 0 : (currentPage - 1) * perPage + 1;
+
+  const endItem = Math.min(currentPage * perPage, filteredUsers.length);
+
+  /* ===============================
+     UI
+  =============================== */
 
   return (
     <div className="bg-white rounded shadow-sm p-3">
-      {showModal && (
-        <div className="modal d-block" tabIndex="-1">
-          <div className="modal-dialog modal-dialog-centered">
-            <div className="modal-content text-center p-4">
-              <div style={{fontSize: 40}}>⚠</div>
+      {/* header */}
+      <div className="d-flex justify-content-between mb-3">
+        <h4 className="fw-bold">Users Management</h4>
 
-              <h5 className="mt-3">Are you sure?</h5>
-              <p className="text-muted small">
-                You won't be able to revert this!
-              </p>
+        <button className="btn btn-primary" onClick={handleAddUser}>
+          + Add New User
+        </button>
+      </div>
 
-              <div className="d-flex justify-content-center gap-2 mt-3">
-                <button className="btn btn-danger" onClick={confirmDelete}>
-                  Yes, delete it!
-                </button>
+      {/* search + filter */}
+      <div className="row mb-3 g-2">
+        <div className="col-md-6 d-flex gap-2">
+          <input
+            className="form-control"
+            placeholder="Search..."
+            value={searchTerm}
+            onChange={(e) => {
+              setSearchTerm(e.target.value);
+              setCurrentPage(1);
+            }}
+          />
 
-                <button className="btn btn-primary" onClick={cancelDelete}>
-                  Cancel
-                </button>
-              </div>
-            </div>
-          </div>
+          <select
+            className="form-select"
+            value={statusFilter}
+            onChange={(e) => {
+              setStatusFilter(e.target.value);
+              setCurrentPage(1);
+            }}
+          >
+            <option value="all">All</option>
+            <option value="active">Active</option>
+            <option value="inactive">Inactive</option>
+          </select>
         </div>
-      )}
+      </div>
 
+      {/* table */}
       <div className="table-responsive">
-        <table className="table align-middle mb-0 users-table">
-          <thead>
-            <tr className="table-row-data">
+        <table className="table align-middle">
+          <thead className="table-light">
+            <tr>
               <th>SL</th>
               <th>Name</th>
               <th>Email</th>
-              <th>Initials</th>
               <th>Phone</th>
-              <th>Role</th>
               <th>Status</th>
-              <th>Title</th>
               <th>Action</th>
             </tr>
           </thead>
@@ -86,28 +164,25 @@ const UsersTable = ({users}) => {
               <tr key={user.id}>
                 <td>{startItem + index}</td>
                 <td>{user.name}</td>
-                <td className="text-truncate email-col">{user.email}</td>
-                <td>{user.initials}</td>
+                <td>{user.email}</td>
                 <td>{user.phone}</td>
-                <td>{user.role}</td>
 
                 <td>
-                  <div className="form-check form-switch m-0">
-                    <input
-                      type="checkbox"
-                      className="form-check-input"
-                      checked={statusMap[user.id] ?? user.active}
-                      onChange={() => toggleStatus(user.id)}
-                    />
-                  </div>
+                  <input
+                    type="checkbox"
+                    checked={statusMap[user.id] ?? user.active}
+                    onChange={() => toggleStatus(user.id)}
+                  />
                 </td>
 
-                <td>{user.title}</td>
-
                 <td>
-                  <button className="btn btn-sm btn-outline-primary me-2">
+                  <button
+                    className="btn btn-sm btn-outline-primary me-2"
+                    onClick={() => navigate(`/edit-user/${user.id}`)}
+                  >
                     ✏
                   </button>
+
                   <button
                     className="btn btn-sm btn-outline-danger"
                     onClick={() => handleDeleteClick(user)}
@@ -121,31 +196,20 @@ const UsersTable = ({users}) => {
         </table>
       </div>
 
-      <div className="d-flex flex-column flex-md-row justify-content-between align-items-center mt-3 gap-2">
-        <small className="text-muted">
-          Showing {startItem}–{endItem} of {users.length} results
+      {/* pagination */}
+      <div className="d-flex justify-content-between mt-3">
+        <small>
+          Showing {startItem}–{endItem} of {filteredUsers.length}
         </small>
 
-        <div className="d-flex gap-2">
+        <div>
           <button
-            className="btn btn-sm btn-light"
+            className="btn btn-sm btn-light me-2"
             disabled={currentPage === 1}
             onClick={() => setCurrentPage((p) => p - 1)}
           >
             ‹
           </button>
-
-          {[...Array(totalPages)].map((_, i) => (
-            <button
-              key={i}
-              className={`btn btn-sm ${
-                currentPage === i + 1 ? "btn-primary" : "btn-light"
-              }`}
-              onClick={() => setCurrentPage(i + 1)}
-            >
-              {i + 1}
-            </button>
-          ))}
 
           <button
             className="btn btn-sm btn-light"
@@ -156,6 +220,30 @@ const UsersTable = ({users}) => {
           </button>
         </div>
       </div>
+
+      {/* delete modal */}
+      {showModal && (
+        <div className="modal d-block">
+          <div className="modal-dialog modal-dialog-centered">
+            <div className="modal-content text-center p-4">
+              <h5>Delete this user?</h5>
+
+              <div className="d-flex justify-content-center gap-2 mt-3">
+                <button className="btn btn-danger" onClick={confirmDelete}>
+                  Delete
+                </button>
+
+                <button
+                  className="btn btn-secondary"
+                  onClick={() => setShowModal(false)}
+                >
+                  Cancel
+                </button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };
